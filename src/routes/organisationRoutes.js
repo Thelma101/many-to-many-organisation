@@ -6,14 +6,15 @@ const {
     addUserToOrganisation
 } = require('../controllers/organisationController');
 const authenticateJWT = require('../middleware/authenticateJWT');
+// const { validateUserFields, validateLoginFields } = require('../middleware/validation');
 
 const router = express.Router();
 
-router.use(authenticateJWT); // Ensure all routes below are protected
+router.use(authenticateJWT);
 
 router.get('/', getUserOrganisations);
 router.get('/:orgId', getOrganisationById);
-router.post('/', createOrganisation);
+router.post('/',  createOrganisation);
 router.post('/:orgId/users', addUserToOrganisation);
 
 module.exports = router;
