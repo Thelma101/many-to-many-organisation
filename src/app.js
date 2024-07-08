@@ -9,7 +9,6 @@ const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
-// Use authRoutes for authentication related routes
 app.use('/auth', authRoutes);
 
 app.use('/users', authenticateJWT, userRoutes);
