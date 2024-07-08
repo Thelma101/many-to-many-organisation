@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const organisationRoutes = require('./routes/organisationRoutes');
 const authenticateJWT = require('./middleware/authenticateJWT');
 
 const app = express();
@@ -10,9 +11,9 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 
 app.use('/auth', authRoutes);
-
-app.use('/users', authenticateJWT, userRoutes);
-
+app.use('/api/organisations', organisationRoutes);
+app.use('/api/users', authenticateJWT, userRoutes);
+// app.use('/api/users/:id', apiRoutes);
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

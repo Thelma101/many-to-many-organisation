@@ -36,7 +36,7 @@ const registerUser = async (req, res) => {
             data: {
                 name: organisationName,
                 users: { 
-                    connect: [{ userId: newUser.userId }] // Wrap in an array
+                    create: [{ userId: newUser.userId }] 
                 }
             }
         });

@@ -1,13 +1,13 @@
 {
-  "name": "userauth-stage2",
+  "name": "userauth-organisation",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Thelma Akpata",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.16.1",
@@ -20,5 +20,13 @@
   },
   "devDependencies": {
     "prisma": "^5.16.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Thelma101/many-to-many-organisation.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Thelma101/many-to-many-organisation/issues"
+  },
+  "homepage": "https://github.com/Thelma101/many-to-many-organisation#readme"
 }
