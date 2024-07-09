@@ -113,39 +113,35 @@ const addUserToOrganisation = async (req, res) => {
     const { orgId } = req.params;
 
     try {
-        const user = await prisma.user.findUnique({
-            where: { userId }
-        });
-
-        if (!user) {
-            return res.status(404).json({
+        if (!userId || typeof userId !== 'string' || userId.trim() === '') {
+            return res.status(400).json({
                 status: 'error',
-                message: 'User not found',
-                statusCode: 404
+                message: 'User ID is required and must be a non-empty string',
+                statusCode: 400
             });
         }
 
-        await prisma.organisation.update({
+        const organisation = await prisma.organisation.update({
             where: { orgId },
-            data: { users: { connect: { userId } } }
+            data: { users: { connect: [{ userId }] } }
         });
 
         res.status(200).json({
             status: 'success',
-            message: 'User added to organisation successfully'
+            message: 'User added to organisation successfully',
+            data: { organisation }
         });
     } catch (error) {
         console.error('Error adding user to organisation:', error);
-        res.status(500).json({
-            status: 'error',
-            message: 'Internal server error',
-            statusCode: 500
+        res.status(400).json({
+            status: 'Bad request',
+            message: 'Failed to add user to organisation',
+            statusCode: 400
         });
     } finally {
         await prisma.$disconnect();
     }
 };
-
 
 module.exports = {
     getUserOrganisations,
