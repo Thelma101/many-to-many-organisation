@@ -1,7 +1,8 @@
 const request = require('supertest');
-const express = require('express');
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 const { PrismaClient } = require('@prisma/client');
+const { app, server } = require('../src/app');
 const authenticateJWT = require('../src/middleware/authenticateJWT');
 const {
   getUserOrganisations,
@@ -9,10 +10,6 @@ const {
   createOrganisation,
   addUserToOrganisation
 } = require('../src/controllers/organisationController');
-
-const app = express();
-app.use(express.json());
-app.use(authenticateJWT);
 
 const prisma = new PrismaClient();
 const secret = process.env.JWT_SECRET || 'jwt_secret';
@@ -23,9 +20,17 @@ describe('Organisation Access Control', () => {
   let orgId;
 
   beforeAll(async () => {
+    const uuid = uuidv4().substring(0,8);
     // Create a test user
     const user = await prisma.user.create({
-      data: { userId: 'testUserId', email: 'test@example.com' }
+      data: {                 
+        userId: uuid,
+        firstName: 'John', 
+        lastName: 'Doe', 
+        email: 'john.doe@example.com', 
+        password: 'hashedPassword', 
+        phone: '1234567890' 
+      }
     });
     userId = user.userId;
 
@@ -48,6 +53,7 @@ describe('Organisation Access Control', () => {
     await prisma.user.deleteMany();
     await prisma.organisation.deleteMany();
     await prisma.$disconnect();
+    await server.close();
   });
 
   it('should allow access to organisations the user belongs to', async () => {
