@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-// const { customAlphabet } = require('nanoid');
+const { v4: uuidv4 } = require('uuid');
 const prisma = new PrismaClient();
 const saltRounds = 10;
 const secret = process.env.JWT_SECRET || 'jwt_secret';
@@ -18,14 +18,12 @@ const registerUser = async (req, res) => {
                 statusCode: 400 
             });
         }
-        const { customAlphabet } = await import('nanoid');
-        const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 10);
-
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+        const uuid = uuidv4().substring(0,8);
         const newUser = await prisma.user.create({
             data: { 
-                userId: nanoid(),
+                userId: uuid,
                 firstName, 
                 lastName, 
                 email, 
@@ -37,10 +35,10 @@ const registerUser = async (req, res) => {
         const organisationName = `${firstName}'s Organisation`;
         await prisma.organisation.create({
             data: {
-                orgId: nanoid, 
+                orgId: uuid, 
                 name: organisationName,
                 users: { 
-                    connect: [{ userId: newUser.userId }] 
+                    create: [{ userId: newUser.userId }] 
                 }
             }
         });

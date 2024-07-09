@@ -81,7 +81,7 @@ const createOrganisation = async (req, res) => {
             });
         }
 
-        const uuid = uuidv4(0, 10);
+        const uuid = uuidv4().substring(10);
         const organisation = await prisma.organisation.create({
             data: {
                 orgId: uuid,
