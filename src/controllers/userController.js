@@ -41,9 +41,12 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const getUserById = async (req, res) => {
+    const { id } = req.params;
+
     try {
         const user = await prisma.user.findUnique({
-            where: { userId: req.params.id }
+            where: { userId: id },
+            include: { organisations: true }
         });
 
         if (!user) {
@@ -56,13 +59,20 @@ const getUserById = async (req, res) => {
 
         res.status(200).json({
             status: 'success',
-            data: { user }
+            message: 'User found',
+            data: {
+                userId: user.userId,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                phone: user.phone
+            }
         });
     } catch (error) {
         console.error('Error fetching user:', error);
         res.status(500).json({
             status: 'error',
-            message: 'Failed to fetch user',
+            message: 'Internal server error',
             statusCode: 500
         });
     } finally {
