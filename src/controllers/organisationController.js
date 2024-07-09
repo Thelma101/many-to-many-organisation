@@ -82,7 +82,7 @@ const createOrganisation = async (req, res) => {
             data: {
                 name,
                 description,
-                users: { connect: { userId: req.user.userId } }
+                users: { create: [{ userId: req.user.userId }] }
             }
         });
 
@@ -95,7 +95,7 @@ const createOrganisation = async (req, res) => {
         console.error('Error creating organisation:', error);
         res.status(400).json({
             status: 'Bad request',
-            message: 'Organisation creation failed',
+            message: 'Client error',
             statusCode: 400
         });
     } finally {
@@ -118,7 +118,7 @@ const addUserToOrganisation = async (req, res) => {
 
         const organisation = await prisma.organisation.update({
             where: { orgId },
-            data: { users: { connect: { userId } } }
+            data: { users: { connect: [{ userId }] } }
         });
 
         res.status(200).json({
