@@ -9,7 +9,8 @@ const router = express.Router();
 router.use(authenticateJWT); 
 
 router.get('/:id', getUserById);
-router.put('/:id',  updateUser, getUserById);
-router.delete('/:id', deleteUser, getUserById);
+// router.put('/:id',  updateUser, getUserById);
+router.put('/:id',  updateUser);
+router.delete('/:id', deleteUser);
 
 module.exports = router;
