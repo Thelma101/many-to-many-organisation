@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
-const secret = process.env.JWT_SECRET || 'your_jwt_secret'; // Use environment variable for the secret key
+const secret = process.env.JWT_SECRET || 'jwt_secret';
 
 const authenticateJWT = async (req, res, next) => {
     const authHeader = req.headers['authorization'];

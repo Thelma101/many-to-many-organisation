@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 app.use('/auth', authRoutes);
 app.use('/api/organisations', organisationRoutes);
 app.use('/api/users', authenticateJWT, userRoutes);
-// app.use('/api/users/:id', apiRoutes);
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

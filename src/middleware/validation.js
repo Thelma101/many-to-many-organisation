@@ -45,6 +45,84 @@ const validateLoginFields = (req, res, next) => {
     next();
 };
 
+// function for update and delete user
+// PUT DELETE
+
+const updateUser = async (req, res) => {
+    const { id } = req.params;
+    const { firstName, lastName, email, phone, password } = req.body;
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: { userId: id }
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'User not found',
+                statusCode: 404
+            });
+        }
+
+        const updateData = {};
+
+        if (firstName !== undefined) updateData.firstName = firstName;
+        if (lastName !== undefined) updateData.lastName = lastName;
+        if (email !== undefined) updateData.email = email;
+        if (phone !== undefined) updateData.phone = phone;
+        if (password !== undefined) {
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+            updateData.password = hashedPassword;
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: { userId: id },
+            data: updateData
+        });
+
+        res.status(200).json({
+            status: 'success',
+            message: 'User updated successfully',
+            data: { user: updatedUser }
+        });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(400).json({
+            status: 'Bad request',
+            message: 'Failed to update user',
+            statusCode: 400
+        });
+    } finally {
+        await prisma.$disconnect();
+    }
+};
+
+const deleteUser = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        await prisma.user.delete({
+            where: { userId: id }
+        });
+
+        res.status(200).json({
+            status: 'success',
+            message: 'User deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(400).json({
+            status: 'Bad request',
+            message: 'Failed to delete user',
+            statusCode: 400
+        });
+    } finally {
+        await prisma.$disconnect();
+    }
+};
+
+
 router.post('/register', validateUserFields, async (req, res) => {
     const { firstName, lastName, email, password, phone } = req.body;
 
@@ -257,6 +335,8 @@ router.post('/organisations/:orgId/users', async (req, res) => {
 module.exports = {
     validateLoginFields,
     validateUserFields,
+    updateUser,
+    deleteUser,
     router
 }
 
