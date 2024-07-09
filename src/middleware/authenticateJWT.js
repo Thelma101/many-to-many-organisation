@@ -48,7 +48,8 @@ const authenticateJWT = async (req, res, next) => {
                 statusCode: 500
             });
         } finally {
-            await prisma.$disconnect(); // Disconnect Prisma client after each request
+            await prisma.$disconnect(); 
+        
         }
     });
 };
