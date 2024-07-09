@@ -102,6 +102,18 @@ const deleteUser = async (req, res) => {
     const { id } = req.params;
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { userId: id }
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'User not found',
+                statusCode: 404
+            });
+        }
+
         await prisma.user.delete({
             where: { userId: id }
         });
@@ -121,6 +133,7 @@ const deleteUser = async (req, res) => {
         await prisma.$disconnect();
     }
 };
+
 
 
 router.post('/register', validateUserFields, async (req, res) => {
