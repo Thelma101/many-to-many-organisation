@@ -9,7 +9,7 @@ datasource db {
 }
 
 model User {
-  userId        String             @id @default(uuid())
+  userId        String             @id @default(nano())
   firstName     String
   lastName      String
   email         String             @unique
@@ -20,7 +20,7 @@ model User {
 }
 
 model Organisation {
-  orgId         String             @id @default(uuid())
+  orgId         String             @id @default(nano())
   name          String
   description   String?
   users         UserOrganisation[]

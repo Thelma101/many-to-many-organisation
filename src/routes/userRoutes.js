@@ -8,5 +8,7 @@ const router = express.Router();
 router.use(authenticateJWT); 
 
 router.get('/:id', getUserById);
+router.put('/:id', validateUserFields, getUserById);
+router.delete('/:id', validateUserFields, getUserById);
 
 module.exports = router;

@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const prisma = new PrismaClient();
 const saltRounds = 10;
-const secret = process.env.JWT_SECRET || 'your_jwt_secret';
+const secret = process.env.JWT_SECRET || 'jwt_secret';
 
 const registerUser = async (req, res) => {
     const { firstName, lastName, email, password, phone } = req.body;
