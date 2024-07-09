@@ -154,7 +154,7 @@ router.get('/users/:id', async (req, res) => {
 
 router.get('/organisations', async (req, res) => {
     try {
-        const userId = req.user.userId; // Assuming req.user is set after token validation
+        const userId = req.user.userId; 
         const organisations = await prisma.organisation.findMany({
             where: { users: { some: { userId } } }
         });

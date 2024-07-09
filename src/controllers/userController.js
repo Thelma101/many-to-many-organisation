@@ -34,18 +34,42 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {
     const { id } = req.params;
-    const { firstName, lastName, email, phone } = req.body;
+    const { firstName, lastName, email, phone, password } = req.body;
 
     try {
-        const user = await prisma.user.update({
+        const user = await prisma.user.findUnique({
+            where: { userId: id }
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'User not found',
+                statusCode: 404
+            });
+        }
+
+        const updateData = {};
+
+        // Only update fields that are provided in the request
+        if (firstName !== undefined) updateData.firstName = firstName;
+        if (lastName !== undefined) updateData.lastName = lastName;
+        if (email !== undefined) updateData.email = email;
+        if (phone !== undefined) updateData.phone = phone;
+        if (password !== undefined) {
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+            updateData.password = hashedPassword;
+        }
+
+        const updatedUser = await prisma.user.update({
             where: { userId: id },
-            data: { firstName, lastName, email, phone }
+            data: updateData
         });
 
         res.status(200).json({
             status: 'success',
             message: 'User updated successfully',
-            data: { user }
+            data: { user: updatedUser }
         });
     } catch (error) {
         console.error('Error updating user:', error);
