@@ -22,9 +22,6 @@ app.listen(PORT, () => {
 
 
 
-
-
-
 // const express = require('express');
 // const validationRoutes = require('./middleware/validation');
 // const authenticateToken = require('./middleware/authenticateToken');
