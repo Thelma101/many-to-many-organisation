@@ -1,3 +1,42 @@
+// const { PrismaClient } = require('@prisma/client');
+// const prisma = new PrismaClient();
+
+// const getUserById = async (req, res) => {
+//     try {
+//         const user = await prisma.user.findUnique({
+//             where: { userId: req.params.id }
+//         });
+
+//         if (!user) {
+//             return res.status(404).json({
+//                 status: 'error',
+//                 message: 'User not found',
+//                 statusCode: 404
+//             });
+//         }
+
+//         res.status(200).json({
+//             status: 'success',
+//             data: { user }
+//         });
+//     } catch (error) {
+//         console.error('Error fetching user:', error);
+//         res.status(500).json({
+//             status: 'Internal server error',
+//             message: 'Failed to fetch user',
+//             statusCode: 500
+//         });
+//     } finally {
+//         await prisma.$disconnect();
+//     }
+// };
+
+// module.exports = {
+//     getUserById,
+//     // updateUser,
+//     // deleteUser,
+// };
+
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
@@ -22,8 +61,53 @@ const getUserById = async (req, res) => {
     } catch (error) {
         console.error('Error fetching user:', error);
         res.status(500).json({
-            status: 'Internal server error',
+            status: 'error',
             message: 'Failed to fetch user',
+            statusCode: 500
+        });
+    } finally {
+        await prisma.$disconnect();
+    }
+};
+
+const updateUser = async (req, res) => {
+    try {
+        const user = await prisma.user.update({
+            where: { userId: req.params.id },
+            data: req.body
+        });
+
+        res.status(200).json({
+            status: 'success',
+            data: { user }
+        });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Failed to update user',
+            statusCode: 500
+        });
+    } finally {
+        await prisma.$disconnect();
+    }
+};
+
+const deleteUser = async (req, res) => {
+    try {
+        await prisma.user.delete({
+            where: { userId: req.params.id }
+        });
+
+        res.status(204).json({
+            status: 'success',
+            message: 'User deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Failed to delete user',
             statusCode: 500
         });
     } finally {
@@ -33,9 +117,10 @@ const getUserById = async (req, res) => {
 
 module.exports = {
     getUserById,
-    // updateUser,
-    // deleteUser,
+    updateUser,
+    deleteUser
 };
+
 
 
 
