@@ -109,7 +109,7 @@ const deleteUser = async (req, res) => {
             where: { userId: req.params.id }
         });
 
-        res.status(204).json({
+        res.status(200).json({
             status: 'success',
             message: 'User deleted successfully'
         });
