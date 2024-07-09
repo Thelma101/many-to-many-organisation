@@ -2,13 +2,13 @@ const request = require('supertest');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
-const authenticateJWT = require('../middleware/authenticateJWT');
+const authenticateJWT = require('../src/middleware/authenticateJWT');
 const {
   getUserOrganisations,
   getOrganisationById,
   createOrganisation,
   addUserToOrganisation
-} = require('../controllers/organisationController');
+} = require('../src/controllers/organisationController');
 
 const app = express();
 app.use(express.json());
@@ -68,4 +68,3 @@ describe('Organisation Access Control', () => {
     expect(response.status).toBe(403);
   });
 });
-    
