@@ -29,10 +29,9 @@ describe('User Registration', () => {
       .post('/auth/register')
       .send({
         firstName: 'tee',
-        lastName: 'thelma',
         email: 'tee.thelma@mail.com',
         password: 'password',
-        phone: '15678998765'
+        phone: '15678998765',
       });
 
     expect(response.status).toBe(422);
@@ -67,8 +66,20 @@ describe('User Registration', () => {
       expect.arrayContaining([
         expect.objectContaining({ field: 'email' }),
       ])
-    );const request = require('supertest');
-const { app, server } = require('../src/app');
+    );
+  });
+});
+
+describe('Organisation Access Control', () => {
+  afterAll(async () => {
+    await server.close();
+  });
+
+
+describe('Organisation Access Control', () => {
+  afterAll(async () => {
+    await server.close();
+  });
 
 describe('User Registration', () => {
   afterAll(async () => {
