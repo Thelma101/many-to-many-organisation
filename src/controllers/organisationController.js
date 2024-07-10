@@ -107,7 +107,7 @@ const createOrganisation = async (req, res) => {
         await prisma.$disconnect();
     }
 };
-    
+
 // const addUserToOrganisation = async (req, res) => {
 //     const { userId } = req.body;
 //     const { orgId } = req.params;
@@ -171,8 +171,8 @@ const addUserToOrganisation = async (req, res) => {
             data: { users: { connect: [{ userId }] } }
         });
 
-        res.status(201).json({
-            status: 'uccess',
+        res.status(200).json({
+            status: 'Success',
             message: 'User added to organisation successfully',
             data: { organisation }
         });
