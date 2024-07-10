@@ -20,10 +20,10 @@ describe('Organisation Access Control', () => {
     const testUser = await prisma.user.create({
       data: {
         userId: '1046ada8',
-        firstName: 'Test',
-        lastName: 'User',
+        firstName: 'tee',
+        lastName: 'Thelma',
         email: 'test.user@mail.com',
-        password: 'password', // You should hash this password in real scenarios
+        password: '123', 
         phone: '1234567890'
       }
     });
