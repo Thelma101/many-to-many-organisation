@@ -20,29 +20,29 @@ describe('Organisation Access Control', () => {
     // Create a test user
     testUser = await prisma.user.create({
       data: {
-        userId: uuidv4(),
+        // userId: uuidv4(),
         firstName: 'tee',
         lastName: 'Thelma',
         email: `test.user${Math.random()}@mail.com`,
         password: '123',
         phone: '1234567890',
-        createdAt: new Date(),
+        // createdAt: new Date(),
       },
     });
 
     const uuid = uuidv4().substring(0, 10);
     testOrg = await prisma.organisation.create({
       data: {
-        orgId: uuid,
+        // orgId: uuid,
         name: 'Test Organisation',
-        description: 'This is a test organisation.'
+        description: 'Olivia Popo once said: This is a test organisation.'
       }
     });
 
     await prisma.userOrganisation.create({
       data: {
         userId: testUser.userId,
-        organisationId: testOrg.orgId,
+        orgId: testOrg.orgId,
       }
     });
 
