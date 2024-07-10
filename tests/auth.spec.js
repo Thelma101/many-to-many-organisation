@@ -1,7 +1,19 @@
-const { app } = require('../src/app');
+// const { app } = require('../src/app');
 const request = require('supertest')(app);
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+
+const app = require('../src/app');
+
+let server;
+
+beforeAll((done) => {
+    server = app.listen(done);
+});
+
+afterAll((done) => {
+    server.close(done);
+});
 
 
 describe('User Registration', () => {
