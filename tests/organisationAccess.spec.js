@@ -4,7 +4,7 @@ const { PrismaClient } = require('@prisma/client');
 const { app, server } = require('../src/app');
 const prisma = new PrismaClient();
 const secret = process.env.JWT_SECRET || 'jwt_secret';
-const { v4:uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require('uuid');
 
 // Helper function to generate JWT token
 const generateToken = (userId) => {
@@ -16,18 +16,32 @@ describe('Organisation Access Control', () => {
     let testUser;
     let testOrg;
 
-    beforeAll(async () => {
+    // beforeAll(async () => {
+    //     // Create a test user
+    //     testUser = await prisma.user.create({
+    //         data: {
+    //             userId: uuidv4(),
+    //             firstName: 'tee',
+    //             lastName: 'Thelma',
+    //             email: 'test.user1@mail.com',
+    //             password: '123',
+    //             phone: '1234567890',
+    //             createdAt: new Date(),
+    //         }
+    //     });
+
+    beforeEach(async () => {
         // Create a test user
         testUser = await prisma.user.create({
             data: {
                 userId: uuidv4(),
                 firstName: 'tee',
                 lastName: 'Thelma',
-                email: 'test.user1@mail.com',
+                email: `test.user${Math.random()}@mail.com`,
                 password: '123',
                 phone: '1234567890',
                 createdAt: new Date(),
-            }
+            },
         });
 
         // Create a test organisation
@@ -39,7 +53,7 @@ describe('Organisation Access Control', () => {
         //     }
         // });
 
-        const uuid = uuidv4().substring(0,10);
+        const uuid = uuidv4().substring(0, 10);
         const testOrg = await prisma.organisation.create({
             data: {
                 orgId: uuid,
@@ -60,13 +74,19 @@ describe('Organisation Access Control', () => {
         token = generateToken(testUser.userId);
     });
 
-    afterAll(async () => {
+    // afterAll(async () => {
+    //     await prisma.user.delete({ where: { userId: testUser.userId } });
+    //     await prisma.organisation.delete({ where: { orgId: testOrg.orgId } });
+    //     await prisma.userOrganisation.deleteMany({ where: { userId: testUser.userId } });
+    //     await server.close();
+    //     await prisma.$disconnect();
+    // });
+
+    afterEach(async () => {
         await prisma.user.delete({ where: { userId: testUser.userId } });
         await prisma.organisation.delete({ where: { orgId: testOrg.orgId } });
         await prisma.userOrganisation.deleteMany({ where: { userId: testUser.userId } });
-        await server.close();
-        await prisma.$disconnect();
-    });
+      });
 
     it('should fetch organisations for authenticated user', async () => {
         const response = await request(app)
