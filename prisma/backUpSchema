@@ -34,3 +34,47 @@ model UserOrganisation {
 
   @@id([userId, organisationId])
 }
+
+
+new
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model User {
+  userId    String   @id @default(uuid()) @unique
+  firstName String   @db.VarChar(255)
+  lastName  String   @db.VarChar(255)
+  email     String   @unique
+  password  String
+  phone     String?
+  createdAt DateTime @default(now())
+  userOrganisations UserOrganisation[]
+}
+
+
+model Organisation {
+  orgId           String           @id @default(uuid()) @unique
+  name            String
+  description     String?
+  creatorId       String
+  creator         User             @relation(fields: [creatorId], references: [userId])
+  userOrganisations UserOrganisation[]
+}
+
+
+model UserOrganisation {
+  id              Int              @id @default(autoincrement())
+  userId          String
+  orgId           String
+  user            User             @relation(fields: [userId], references: [userId])
+  organisation    Organisation     @relation(fields: [orgId], references: [orgId])
+  
+  @@unique([userId, orgId])
+}

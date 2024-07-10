@@ -51,6 +51,8 @@ describe('Organisation Access Control', () => {
             data: {
               userId: testUser.userId,
               orgId: testOrg.orgId,
+              user: testUser.userId,
+              organisation:  testOrg.orgId,
             }
           });
 

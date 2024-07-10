@@ -39,3 +39,4 @@ model UserOrganisation {
   
   @@unique([userId, orgId])
 }
+
