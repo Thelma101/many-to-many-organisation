@@ -16,14 +16,14 @@ describe('User Registration', () => {
       .send({
         firstName: 'tee',
         lastName: 'thelma',
-        email: 'tee.thelma1@mail.com',
+        email: 'tee.thelma2@mail.com',
         password: '123',
         phone: '1234567890',
       });
 
     expect(response.status).toBe(201);
     expect(response.body.data.user.firstName).toBe('tee');
-    expect(response.body.data.user.email).toBe('tee.thelma@mail.com');
+    expect(response.body.data.user.email).toBe('tee.thelma2@mail.com');
     expect(response.body.data.user).toHaveProperty('userId');
     expect(response.body.data).toHaveProperty('accessToken');
   });
@@ -33,7 +33,7 @@ describe('User Registration', () => {
       .post('/auth/register')
       .send({
         firstName: 'tee',
-        email: 'tee.thelma1@mail.com',
+        email: 'tee.thelma2@mail.com',
         password: '123',
         phone: '1234567890',
       });
