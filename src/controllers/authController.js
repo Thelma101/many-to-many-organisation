@@ -37,9 +37,9 @@ const registerUser = async (req, res) => {
             data: {
                 orgId: uuid, 
                 name: organisationName,
-                users: { 
-                    create: [{ userId: newUser.userId }] 
-                }
+                users: { userId: newUser.userId }
+                    // create: [{ userId: newUser.userId }] 
+                // }
             }
         });
 
