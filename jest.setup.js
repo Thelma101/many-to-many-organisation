@@ -1,16 +1,17 @@
 require('dotenv').config();
-// const { app, server } = require('./src/app');
+const supertest = require('supertest');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+const { app, server } = require('./src/app');
 
 process.env.PORT = 4000;
+
 beforeAll(async () => {
-
-    const DATABASE_URL = process.env.DATABASE_URL;
-
-    const { server } = require('./src/app');
-
-    afterAll(async () => {
-        await server.close();
-    });
-
+  process.env.DATABASE_URL = process.env.DATABASE_URL;
+  await prisma.$connect();
 });
 
+afterAll(async () => {
+  await server.close();
+  await prisma.$disconnect();
+});
