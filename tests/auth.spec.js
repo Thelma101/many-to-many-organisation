@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { app, server } = require('../src/app');
+const app = require('../src/app');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const jwt = require('jsonwebtoken');
@@ -11,19 +11,20 @@ describe('User Registration', () => {
   });
 
   it('should register user successfully with default organisation', async () => {
+    const email = `tee.thelma${Math.random()}@mail.com`;
     const response = await request(app)
-     .post('/auth/register')
-     .send({
+      .post('/auth/register')
+      .send({
         firstName: 'tee',
         lastName: 'thelma',
-        email: `tee.thelma${Math.random()}@mail.com`,
+        email,
         password: '123',
         phone: '1234567890',
       });
 
     expect(response.status).toBe(201);
     expect(response.body.data.user.firstName).toBe('tee');
-    expect(response.body.data.user.email).toBe(`tee.thelma${Math.random()}@mail.com`);
+    expect(response.body.data.user.email).toBe(email);
     expect(response.body.data.user).toHaveProperty('userId');
     expect(response.body.data).toHaveProperty('accessToken');
   });
@@ -47,7 +48,7 @@ describe('User Registration', () => {
   });
 
   it('should fail if there is a duplicate email', async () => {
-    const uniqueEmail = 'unique' + Date.now() + '@mail.com';
+    const uniqueEmail = `unique${Date.now()}@mail.com`;
     await request(app).post('/auth/register').send({
       firstName: 'tee',
       lastName: 'thelma',
@@ -59,8 +60,8 @@ describe('User Registration', () => {
     const response = await request(app)
       .post('/auth/register')
       .send({
-        firstName: 'Jane',
-        lastName: 'thelma',
+        firstName: 'Thelma',
+        lastName: 'Akpata',
         email: uniqueEmail,
         password: '123',
         phone: '0987654321',
@@ -73,7 +74,7 @@ describe('User Registration', () => {
       ])
     );
   });
-}); 
+});
 
 
 
