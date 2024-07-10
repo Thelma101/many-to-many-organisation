@@ -1,9 +1,9 @@
 // const { app } = require('../src/app');
-const request = require('supertest')(app);
+const app = require('../src/app');
+const request = supertest(app);
+// const request = require('supertest');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-
-const app = require('../src/app');
 
 let server;
 
@@ -25,7 +25,7 @@ describe('User Registration', () => {
 
   it('should register user successfully with default organisation', async () => {
     const email = `tee.thelma${Math.random()}@mail.com`;
-    const response = await request(app)
+    const response = await request
       .post('/auth/register')
       .send({
         firstName: 'tee',
@@ -46,7 +46,7 @@ describe('User Registration', () => {
   });
 
   it('should fail if required fields are missing', async () => {
-    const response = await request(app)
+    const response = await request
       .post('/auth/register')
       .send({
         firstName: 'tee',
@@ -65,7 +65,7 @@ describe('User Registration', () => {
 
   it('should fail if there is a duplicate email', async () => {
     const uniqueEmail = `unique${Date.now()}@mail.com`;
-    await request(app).post('/auth/register').send({
+    await request.post('/auth/register').send({
       firstName: 'tee',
       lastName: 'thelma',
       email: uniqueEmail,
@@ -73,7 +73,7 @@ describe('User Registration', () => {
       phone: '1234567890',
     });
 
-    const response = await request(app)
+    const response = await request
       .post('/auth/register')
       .send({
         firstName: 'Thelma',

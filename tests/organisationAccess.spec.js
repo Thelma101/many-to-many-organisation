@@ -46,6 +46,18 @@ describe('Organisation Access Control', () => {
             }
         });
 
+        await prisma.userOrganisation.create({
+            data: {
+              userId: testUser.userId,
+              orgId: testOrg.orgId,
+              user: {
+                connect: {
+                  id: testUser.id,
+                },
+              },
+            },
+          });
+
         token = generateToken(testUser.userId);
 
         // Debugging output
