@@ -20,7 +20,7 @@ describe('Token Utils', () => {
 
   it('should expire the token at the correct time', (done) => {
     const userId = uuidv4();
-    const token = generateToken(userId, '1s');
+    const token = generateToken(userId, '1h');
     
     setTimeout(() => {
       expect(() => verifyToken(token)).toThrow(jwt.TokenExpiredError);

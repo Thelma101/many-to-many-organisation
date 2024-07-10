@@ -31,9 +31,18 @@ describe('Organisation Access Control', () => {
         });
 
         // Create a test organisation
-        testOrg = await prisma.organisation.create({
+        // testOrg = await prisma.organisation.create({
+        //     data: {
+        //         orgId: uuidv4(),
+        //         name: 'Test Organisation',
+        //         description: 'This is a test organisation.'
+        //     }
+        // });
+
+        const uuid = uuidv4().substring(0,10);
+        const testOrg = await prisma.organisation.create({
             data: {
-                orgId: uuidv4(),
+                orgId: uuid,
                 name: 'Test Organisation',
                 description: 'This is a test organisation.'
             }

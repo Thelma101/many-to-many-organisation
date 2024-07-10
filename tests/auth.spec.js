@@ -73,7 +73,7 @@ describe('User Registration', () => {
       ])
     );
   });
-});
+}); 
 
 
 
