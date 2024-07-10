@@ -18,13 +18,22 @@ describe('Token Utils', () => {
     expect(decoded.userId).toBe(userId);
   });
 
-  it('should expire the token at the correct time', async () => {
-    const userId = uuidv4();
-    const token = generateToken(userId, '1h');
+//   it('should expire the token at the correct time', async () => {
+//     const userId = uuidv4();
+//     const token = generateToken(userId, '1h');
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    expect(() => verifyToken(token)).toThrow(jwt.TokenExpiredError);
-  });
+//     await new Promise(resolve => setTimeout(resolve, 1500));
+//     expect(() => verifyToken(token)).toThrow(jwt.TokenExpiredError);
+//   });
+// });
+
+it('should expire the token at the correct time', async () => {
+  const token = generateToken(userId);
+  console.log(`Token expiration time: ${jwt.decode(token).exp * 1000}`); // Log the token expiration time
+
+  await new Promise(resolve => setTimeout(resolve, 1500)); // Wait for 1.5 seconds
+
+  expect(() => verifyToken(token)).toThrow(jwt.TokenExpiredError);
 });
 
 // require('dotenv').config();
