@@ -2,7 +2,8 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const { generateToken, verifyToken } = require('../tokenUtils');
+const { generateToken, verifyToken } = require('./tokenUtils.spec.js')
+const { v4:uuidv4 } = require('uuid');
 
 describe('Token Utils', () => {
   afterAll(async () => {
@@ -10,7 +11,7 @@ describe('Token Utils', () => {
   });
 
   it('should generate a token with correct user details', () => {
-    const userId = '123';
+    const userId = uuidv4();
     const token = generateToken(userId, '1h');
     const decoded = verifyToken(token);
 
@@ -18,7 +19,7 @@ describe('Token Utils', () => {
   });
 
   it('should expire the token at the correct time', (done) => {
-    const userId = '123';
+    const userId = uuidv4();
     const token = generateToken(userId, '1s');
     
     setTimeout(() => {

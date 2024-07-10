@@ -4,6 +4,7 @@ const { PrismaClient } = require('@prisma/client');
 const { app, server } = require('../src/app');
 const prisma = new PrismaClient();
 const secret = process.env.JWT_SECRET || 'jwt_secret';
+const { v4:uuidv4 } = require('uuid');
 
 // Helper function to generate JWT token
 const generateToken = (userId) => {
@@ -19,7 +20,7 @@ describe('Organisation Access Control', () => {
         // Create a test user
         testUser = await prisma.user.create({
             data: {
-                userId: '1046ada8',
+                userId: uuidv4(),
                 firstName: 'tee',
                 lastName: 'Thelma',
                 email: 'test.user@mail.com',
@@ -32,7 +33,7 @@ describe('Organisation Access Control', () => {
         // Create a test organisation
         testOrg = await prisma.organisation.create({
             data: {
-                orgId: '25ed99b2',
+                orgId: uuidv4(),
                 name: 'Test Organisation',
                 description: 'This is a test organisation.'
             }
@@ -64,7 +65,7 @@ describe('Organisation Access Control', () => {
             .set('Authorization', `Bearer ${token}`);
 
         expect(response.status).toBe(200);
-        expect(response.body.data.organisations).toBeInstanceOf(Array);
+        expect(response.body.data).toBeInstanceOf(Array);
     });
 
     it('should return 404 if no organisations found for user', async () => {
@@ -84,7 +85,7 @@ describe('Organisation Access Control', () => {
             .set('Authorization', `Bearer ${token}`);
 
         expect(response.status).toBe(200);
-        expect(response.body.data.organisation.orgId).toBe(testOrg.orgId);
+        expect(response.body.data.orgId).toBe(testOrg.orgId);
     });
 
     it('should return 404 if organisation not found by ID', async () => {
@@ -106,7 +107,7 @@ describe('Organisation Access Control', () => {
             });
 
         expect(response.status).toBe(201);
-        expect(response.body.data.organisation).toHaveProperty('orgId');
+        expect(response.body.data).toHaveProperty('orgId');
     });
 
     it('should fail to create organisation with invalid data', async () => {
@@ -122,12 +123,13 @@ describe('Organisation Access Control', () => {
     it('should add a user to an existing organisation', async () => {
         const newUser = await prisma.user.create({
             data: {
-                userId: 'e34a646f',
+                userId: uuidv4(),
                 firstName: 'new',
                 lastName: 'user',
                 email: 'new.user@mail.com',
                 password: '123',
-                phone: '1234567890'
+                phone: '1234567890',
+                createdAt: new Date(),
             }
         });
 

@@ -2,6 +2,7 @@ const request = require('supertest');
 const { app, server } = require('../src/app');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { v4:uuidv4 } = require('uuid');
 
 describe('User Registration', () => {
   afterAll(async () => {
@@ -11,12 +12,12 @@ describe('User Registration', () => {
 
   it('should register user successfully with default organisation', async () => {
     const response = await request(app)
-      .post('/api/auth/register')
+      .post('/auth/register')
       .send({
         firstName: 'tee',
         lastName: 'thelma',
-        email: 'tee.thelma@mail.com',
-        password: 'password',
+        email: 'tee.thelma1@mail.com',
+        password: '123',
         phone: '1234567890',
       });
 
@@ -29,11 +30,11 @@ describe('User Registration', () => {
 
   it('should fail if required fields are missing', async () => {
     const response = await request(app)
-      .post('/api/auth/register')
+      .post('/auth/register')
       .send({
         firstName: 'tee',
-        email: 'tee.thelma@mail.com',
-        password: 'password',
+        email: 'tee.thelma1@mail.com',
+        password: '123',
         phone: '1234567890',
       });
 
@@ -51,17 +52,17 @@ describe('User Registration', () => {
       firstName: 'tee',
       lastName: 'thelma',
       email: uniqueEmail,
-      password: 'password',
+      password: '123',
       phone: '1234567890',
     });
 
     const response = await request(app)
-      .post('/api/auth/register')
+      .post('/auth/register')
       .send({
         firstName: 'Jane',
         lastName: 'thelma',
         email: uniqueEmail,
-        password: 'password',
+        password: '123',
         phone: '0987654321',
       });
 
