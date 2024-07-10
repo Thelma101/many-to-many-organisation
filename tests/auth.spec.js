@@ -1,15 +1,12 @@
-const request = require('supertest');
-const jwt = require('jsonwebtoken');
+const { app } = require('../src/app');
+const request = require('supertest')(app);
 const { PrismaClient } = require('@prisma/client');
-const { app, server } = require('../src/app');
 const prisma = new PrismaClient();
-const { v4: uuidv4 } = require('uuid');
 
-const secret = process.env.JWT_SECRET || 'jwt_secret';
 
 describe('User Registration', () => {
   afterEach(async () => {
-    await server.close();
+    // await app.close();
     await prisma.$disconnect();
   });
 

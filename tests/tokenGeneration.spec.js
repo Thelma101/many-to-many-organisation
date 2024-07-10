@@ -1,9 +1,19 @@
 require('dotenv').config();
+
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const { generateToken, verifyToken } = require('./tokenUtils');
 const { v4: uuidv4 } = require('uuid');
+
+const secret = process.env.JWT_SECRET || 'jwt_secret';
+
+const generateToken = (userId, expiresIn) => {
+  return jwt.sign({ userId }, secret, { expiresIn });
+};
+
+const verifyToken = (token) => {
+  return jwt.verify(token, secret);
+};
 
 describe('Token Utils', () => {
   afterAll(async () => {
@@ -17,37 +27,6 @@ describe('Token Utils', () => {
 
     expect(decoded.userId).toBe(userId);
   });
-
-  const jwt = require('jsonwebtoken');
-
-const secret = process.env.JWT_SECRET || 'jwt_secret';
-
-const generateToken = (userId, expiresIn) => {
-  return jwt.sign({ userId }, secret, { expiresIn });
-};
-
-const verifyToken = (token) => {
-  return jwt.verify(token, secret);
-};
-
-module.exports = { generateToken, verifyToken };
-//   it('should expire the token at the correct time', async () => {
-//     const userId = uuidv4();
-//     const token = generateToken(userId, '1h');
-
-//     await new Promise(resolve => setTimeout(resolve, 1500));
-//     expect(() => verifyToken(token)).toThrow(jwt.TokenExpiredError);
-//   });
-// });
-
-it('should expire the token at the correct time', async () => {
-  const token = generateToken(userId);
-  console.log(`Token expiration time: ${jwt.decode(token).exp * 1000}`); // Log the token expiration time
-
-  await new Promise(resolve => setTimeout(resolve, 1500)); // Wait for 1.5 seconds
-
-  expect(() => verifyToken(token)).toThrow(jwt.TokenExpiredError);
-});
 });
 
 
