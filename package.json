@@ -5,8 +5,6 @@
   "main": "app.js",
   "scripts": {
         "test": "jest --verbose --detectOpenHandles"
-    }
-    
   },
   "keywords": [],
   "author": "Thelma Akpata",
