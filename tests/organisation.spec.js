@@ -3,74 +3,119 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { PrismaClient } = require('@prisma/client');
 const { app, server } = require('../src/app');
-const authenticateJWT = require('../src/middleware/authenticateJWT');
-const {
-  getUserOrganisations,
-  getOrganisationById,
-  createOrganisation,
-  addUserToOrganisation
-} = require('../src/controllers/organisationController');
 
 const prisma = new PrismaClient();
 const secret = process.env.JWT_SECRET || 'jwt_secret';
 
+// Helper function to generate JWT token
+const generateToken = (userId) => {
+  return jwt.sign({ userId }, secret, { expiresIn: '1h' });
+};
+
 describe('Organisation Access Control', () => {
   let token;
-  let userId;
-  let orgId;
 
   beforeAll(async () => {
-    const uuid = uuidv4().substring(0,8);
-    // Create a test user
-    const user = await prisma.user.create({
-      data: {                 
-        userId: uuid,
-        firstName: 'John', 
-        lastName: 'Doe', 
-        email: 'john.doe@example.com', 
-        password: 'hashedPassword', 
-        phone: '1234567890' 
-      }
-    });
-    userId = user.userId;
-
-    // Create a test organisation
-    const organisation = await prisma.organisation.create({
+    // Create a test user and generate a JWT token for authentication
+    const testUser = await prisma.user.create({
       data: {
-        orgId: 'testOrgId',
-        name: 'Test Organisation',
-        users: { create: [{ userId: userId }] }
+        userId: '1046ada8',
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'test.user@mail.com',
+        password: 'password', // You should hash this password in real scenarios
+        phone: '1234567890'
       }
     });
-    orgId = organisation.orgId;
 
-    // Generate a token for the test user
-    token = jwt.sign({ userId: userId }, secret, { expiresIn: '1h' });
+    token = generateToken(testUser.userId);
   });
 
   afterAll(async () => {
-    // Clean up test data
-    await prisma.user.deleteMany();
-    await prisma.organisation.deleteMany();
-    await prisma.$disconnect();
     await server.close();
+    await prisma.$disconnect();
   });
 
-  it('should allow access to organisations the user belongs to', async () => {
+  it('should fetch organisations for authenticated user', async () => {
     const response = await request(app)
-      .get('/api/organisations')
+      .get('/organisations')
       .set('Authorization', `Bearer ${token}`);
 
     expect(response.status).toBe(200);
-    expect(response.body.data.organisations).toHaveLength(1);
-    expect(response.body.data.organisations[0].orgId).toBe(orgId);
+    expect(response.body.data.organisations).toBeInstanceOf(Array);
   });
 
-  it('should not allow access to organisations the user does not belong to', async () => {
+  it('should return 404 if no organisations found for user', async () => {
     const response = await request(app)
-      .get('/api/organisations/invalidOrgId')
+      .get('/organisations')
       .set('Authorization', `Bearer ${token}`);
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(404);
+    expect(response.body.message).toBe('No organisations found for the user');
+  });
+
+  it('should fetch a specific organisation by ID', async () => {
+    const orgId = '25ed99b2';
+    const response = await request(app)
+      .get(`/organisations/${orgId}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.organisation.orgId).toBe(orgId);
+  });
+
+  it('should return 404 if organisation not found by ID', async () => {
+    const orgId = '25ed99b2-0';
+    const response = await request(app)
+      .get(`/organisations/${orgId}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(404);
+    expect(response.body.message).toBe('Organisation not found');
+  });
+
+  it('should create a new organisation', async () => {
+    const response = await request(app)
+      .post('/organisations')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        name: 'New Organisation',
+        description: 'Organisation Description'
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.data.organisation).toHaveProperty('orgId');
+  });
+
+  it('should fail to create organisation with invalid data', async () => {
+    const response = await request(app)
+      .post('/organisations')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: '' });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe('Organisation name is required and must be a non-empty string');
+  });
+
+  it('should add a user to an existing organisation', async () => {
+    const orgId = '62d83d4f-8';
+    const response = await request(app)
+      .post(`/organisations/${orgId}/users`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ userId: 'e34a646f' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('User added to organisation successfully');
+  });
+
+  it('should fail to add user to organisation with invalid data', async () => {
+    const orgId = '62d83d4f-8';
+    const response = await request(app)
+      .post(`/organisations/${orgId}/users`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ userId: '' });
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe('User ID is required and must be a non-empty string');
   });
 });

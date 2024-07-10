@@ -15,7 +15,7 @@ router.use(authenticateJWT);
 router.get('/', getUserOrganisations);
 router.get('/:orgId', getOrganisationById);
 router.post('/', createOrganisation);
-router.post('/:orgId/:id/users', addUserToOrganisation);
+router.post('/:orgId//users', addUserToOrganisation);
 
 module.exports = router;
 
