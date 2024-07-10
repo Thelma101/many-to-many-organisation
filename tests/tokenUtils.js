@@ -1,11 +1,10 @@
 const jwt = require('jsonwebtoken');
 
 const secret = process.env.JWT_SECRET || 'jwt_secret';
-// process.env.DATABASE_URL = process.env.DATABASE_URL;
-const generateToken = (userId, expiresIn) => {
-  return jwt.sign({ userId }, secret, { expiresIn : '1hr'});
-};
 
+const generateToken = (userId, expiresIn) => {
+  return jwt.sign({ userId }, secret, { expiresIn });
+};
 
 const verifyToken = (token) => {
   return jwt.verify(token, secret);
