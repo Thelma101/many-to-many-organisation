@@ -39,23 +39,19 @@ describe('Organisation Access Control', () => {
             }
         });
 
-        await prisma.userOrganisation.create({
-            data: {
-                userId: { connect: { userId: testUser.userId } },
-                orgId: { connect: { orgId: testOrg.orgId } },
-            }
-        });
+        // await prisma.userOrganisation.create({
+        //     data: {
+        //         userId: { connect: { userId: testUser.userId } },
+        //         orgId: { connect: { orgId: testOrg.orgId } },
+        //     }
+        // });
 
-        await prisma.userOrganisation.create({
+
+          await prisma.userOrganisation.create({
             data: {
               userId: testUser.userId,
               orgId: testOrg.orgId,
-              user: {
-                connect: {
-                  id: testUser.id,
-                },
-              },
-            },
+            }
           });
 
         token = generateToken(testUser.userId);
@@ -169,8 +165,42 @@ describe('Organisation Access Control', () => {
         expect(response.status).toBe(400);
         expect(response.body.message).toBe('User ID is required and must be a non-empty string');
     });
-});
-
+it('should add a user to an existing organisation', async () => {
+        const newUser = await prisma.user.create({
+          data: {
+            userId: uuid,
+            firstName: 'new',
+            lastName: 'user',
+            email: 'new.user1@mail.com',
+            password: '123',
+            phone: '1234567890',
+            createdAt: new Date(),
+          }
+        });
+    
+        const response = await request(app)
+          .post(`/api/organisations/${testOrg.orgId}/users`)
+          .set('Authorization', `Bearer ${token}`)
+          .send({ userId: newUser.userId });
+    
+        expect(response.status).toBe(200);
+        expect(response.body.message).toBe('User added to organisation successfully');
+      });
+    
+      it('should fail to add user to organisation with invalid data', async () => {
+        // Ensure testOrg is defined
+        expect(testOrg).toBeDefined();
+    
+        const response = await request(app)
+          .post(`/api/organisations/${testOrg.orgId}/users`)
+          .set('Authorization', `Bearer ${token}`)
+          .send({ userId: '' });
+    
+        expect(response.status).toBe(400);
+        expect(response.body.message).toBe('User ID is required and must be a non-empty string');
+      });
+    });
+    
 
 // const request = require('supertest');
 // const jwt = require('jsonwebtoken');

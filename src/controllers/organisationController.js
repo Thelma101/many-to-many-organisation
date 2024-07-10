@@ -107,7 +107,7 @@ const createOrganisation = async (req, res) => {
         await prisma.$disconnect();
     }
 };
-
+    
 // const addUserToOrganisation = async (req, res) => {
 //     const { userId } = req.body;
 //     const { orgId } = req.params;
