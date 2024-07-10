@@ -4,7 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "jest"
+        "test": "jest --verbose --detectOpenHandles"
+    }
+    
   },
   "keywords": [],
   "author": "Thelma Akpata",
@@ -21,6 +23,7 @@
   },
   "devDependencies": {
     "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
     "prisma": "^5.16.1",
     "supertest": "^7.0.0"
   },

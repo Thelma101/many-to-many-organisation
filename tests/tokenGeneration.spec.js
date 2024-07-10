@@ -18,6 +18,19 @@ describe('Token Utils', () => {
     expect(decoded.userId).toBe(userId);
   });
 
+  const jwt = require('jsonwebtoken');
+
+const secret = process.env.JWT_SECRET || 'jwt_secret';
+
+const generateToken = (userId, expiresIn) => {
+  return jwt.sign({ userId }, secret, { expiresIn });
+};
+
+const verifyToken = (token) => {
+  return jwt.verify(token, secret);
+};
+
+module.exports = { generateToken, verifyToken };
 //   it('should expire the token at the correct time', async () => {
 //     const userId = uuidv4();
 //     const token = generateToken(userId, '1h');
@@ -35,6 +48,9 @@ it('should expire the token at the correct time', async () => {
 
   expect(() => verifyToken(token)).toThrow(jwt.TokenExpiredError);
 });
+});
+
+
 
 // require('dotenv').config();
 // const jwt = require('jsonwebtoken');
