@@ -8,7 +8,7 @@ const organisationRoutes = require('./routes/organisationRoutes');
 const authenticateJWT = require('./middleware/authenticateJWT');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = 3001;
 
 // Middleware
 app.use(bodyParser.json());

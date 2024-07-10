@@ -6,6 +6,7 @@ const generateToken = (userId, expiresIn) => {
   return jwt.sign({ userId }, secret, { expiresIn : '1hr'});
 };
 
+
 const verifyToken = (token) => {
   return jwt.verify(token, secret);
 };
