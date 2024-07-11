@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
-const { generateAccessToken, verifyToken } = require('../utils/generateAccessToken.js');
+const { generateAccessToken } = require('../utils/generateAccessToken.js');
 
 const prisma = new PrismaClient();
 const saltRounds = 10;
@@ -22,6 +22,7 @@ const registerUser = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     const user = await prisma.user.create({
       data: {
         userId: uuidv4(),
@@ -37,7 +38,7 @@ const registerUser = async (req, res) => {
       data: {
         orgId: uuidv4(),
         name: `${firstName}'s Organisation`,
-        description: '',
+        description: req.body.description, 
       },
     });
 
@@ -45,6 +46,8 @@ const registerUser = async (req, res) => {
       data: {
         userId: user.userId,
         orgId: organisation.orgId,
+        user: { user: user.userId},
+        organisation: { organisation: organisation.orgId }
       },
     });
 
