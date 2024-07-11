@@ -118,5 +118,6 @@ const getOrganisations = async (req, res) => {
 module.exports = {
     createOrganisation,
     getOrganisations,
+    // getOrganisationId,
     // addUserToOrganisation,
 };

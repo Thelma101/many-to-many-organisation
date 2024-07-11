@@ -73,53 +73,38 @@ const getOrganisations = async (req, res) => {
     }
 };
 
-// const getOrganisationById = async (req, res) => {
-//     const { orgId } = req.params;
-//     const userId = req.user.userId;
+const getOrganisationByUserId = async (req, res) => {
+    const { id } = req.params;
 
-//     try {
-//         const organisation = await prisma.organisation.findUnique({
-//             where: { orgId },
-//         });
+    try {
+        const user = await prisma.user.findUnique({
+            where: { userId : id },
+        });
 
-//         if (!organisation) {
-//             return res.status(404).json({
-//                 status: 'error',
-//                 message: 'Organisation not found',
-//             });
-//         }
+        if (!user) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'User not found',
+            });
+        }
 
-//         // Check if the user is in the same organisation
-//         const userOrganisation = await prisma.userOrganisation.findFirst({
-//             where: { userId, organisationId: orgId },
-//         });
-
-//         if (!userOrganisation) {
-//             return res.status(403).json({
-//                 status: 'error',
-//                 message: 'Access denied',
-//             });
-//         }
-
-//         res.status(200).json({
-//             status: 'success',
-//             message: 'Organisation found',
-//             data: {
-//                 orgId: organisation.orgId,
-//                 name: organisation.name,
-//                 description: organisation.description,
-//             },
-//         });
-//     } catch (error) {
-//         console.error('Error fetching organisation:', error);
-//         res.status(500).json({
-//             status: 'error',
-//             message: 'Internal server error',
-//         });
-//     } finally {
-//         await prisma.$disconnect();
-//     }
-// };
+        res.status(200).json({
+            status: 'success',
+            message: 'User found',
+            data: {
+                user
+            },
+        });
+    } catch (error) {
+        console.error('Error fetching organisation:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Internal server error',
+        });
+    } finally {
+        await prisma.$disconnect();
+    }
+};
 
 // const addUserToOrganisation = async (req, res) => {
 //     const { orgId } = req.params;
@@ -173,6 +158,6 @@ const getOrganisations = async (req, res) => {
 module.exports = {
     // getOrganisationByUserId,
     getOrganisations,
-    // getOrganisationById,
+    getOrganisationByUserId,
     // addUserToOrganisation,
 };
