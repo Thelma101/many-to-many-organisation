@@ -10,7 +10,6 @@ router.post('/login', validateLoginFields, loginUser);
 module.exports = router;
 
 
-
 // const express = require('express');
 // const bcrypt = require('bcrypt');
 // const jwt = require('jsonwebtoken');

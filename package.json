@@ -4,13 +4,13 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-        "test": "jest --verbose --detectOpenHandles"
+    "test": "jest --verbose --detectOpenHandles"
   },
   "keywords": [],
   "author": "Thelma Akpata",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.16.1",
+    "@prisma/client": "^5.16.2",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
@@ -22,7 +22,7 @@
   "devDependencies": {
     "jest": "^29.7.0",
     "jest-junit": "^16.0.0",
-    "prisma": "^5.16.1",
+    "prisma": "^5.16.2",
     "supertest": "^7.0.0"
   },
   "repository": {

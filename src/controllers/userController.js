@@ -87,3 +87,5 @@ const createUser = async (req, res) => {
     await prisma.$disconnect();
   }
 };
+
+module.exports = { getUserById, createUser };
