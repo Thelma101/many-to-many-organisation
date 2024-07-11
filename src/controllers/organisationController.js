@@ -1,53 +1,15 @@
+const { v4: uuidv4 } = require('uuid');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-
-const createOrganisation = async (req, res) => {
-    const { name, description } = req.body;
-
-    try {
-        if (!name || typeof name !== 'string' || name.trim() === '') {
-            return res.status(400).json({
-                status: 'error',
-                message: 'Organisation name is required and must be a non-empty string',
-                statusCode: 400
-            });
-        }
-
-        const newOrganisation = await prisma.organisation.create({
-            data: {
-                orgId: uuidv4().substring(0, 8),
-                name,
-                description,
-                creatorId: req.user.userId
-            }
-        });
-
-        res.status(201).json({
-            status: 'success',
-            message: 'Organisation created successfully',
-            data: { organisation: newOrganisation }
-        });
-    } catch (error) {
-        console.error('Error creating organisation:', error);
-        res.status(400).json({
-            status: 'Bad Request',
-            message: 'Failed to create organisation',
-            statusCode: 400
-        });
-    } finally {
-        await prisma.$disconnect();
-    }
-};
-
 
 const getOrganisations = async (req, res) => {
     try {
         const userId = req.user.userId;
         const organisations = await prisma.organisation.findMany({
-            where: { creatorId: userId }
+            where: { users: { some: { userId } } }
         });
 
-        if (organisations.length === 0) {
+        if (!organisations || organisations.length === 0) {
             return res.status(404).json({
                 status: 'error',
                 message: 'No organisations found for the user',
@@ -63,7 +25,7 @@ const getOrganisations = async (req, res) => {
     } catch (error) {
         console.error('Error fetching organisations:', error);
         res.status(500).json({
-            status: 'error',
+            status: 'Internal server error',
             message: 'Failed to fetch organisations',
             statusCode: 500
         });
@@ -76,12 +38,11 @@ const getOrganisationById = async (req, res) => {
     const { orgId } = req.params;
 
     try {
-        const organisationById = await prisma.organisation.findUnique({
-            where: { orgId },
-            include: { users: true }
+        const organisation = await prisma.organisation.findUnique({
+            where: { orgId }
         });
 
-        if (!organisationById) {
+        if (!organisation) {
             return res.status(404).json({
                 status: 'error',
                 message: 'Organisation not found',
@@ -92,13 +53,12 @@ const getOrganisationById = async (req, res) => {
         res.status(200).json({
             status: 'success',
             message: 'Organisation fetched successfully',
-            data: { organisation: organisationById }
+            data: { organisation }
         });
-
     } catch (error) {
         console.error('Error fetching organisation:', error);
         res.status(500).json({
-            status: 'error',
+            status: 'Internal server error',
             message: 'Failed to fetch organisation',
             statusCode: 500
         });
@@ -106,6 +66,82 @@ const getOrganisationById = async (req, res) => {
         await prisma.$disconnect();
     }
 };
+
+
+
+const createOrganisation = async (req, res) => {
+    const { name, description } = req.body;
+
+    try {
+        if (!name || typeof name !== 'string' || name.trim() === '') {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Organisation name is required and must be a non-empty string',
+                statusCode: 400
+            });
+        }
+
+        const uuid = uuidv4().substring(0, 10);
+        const organisation = await prisma.organisation.create({
+            data: {
+                orgId: uuid,
+                name,
+                description,
+                users: { connect: [{ userId: req.user.userId }] }
+            }
+        });
+
+        res.status(201).json({
+            status: 'success',
+            message: 'Organisation created successfully',
+            data: { organisation }
+        });
+    } catch (error) {
+        console.error('Error creating organisation:', error);
+        res.status(400).json({
+            status: 'Bad request',
+            message: 'Client error',
+            statusCode: 400
+        });
+    } finally {
+        await prisma.$disconnect();
+    }
+};
+
+// const addUserToOrganisation = async (req, res) => {
+//     const { userId } = req.body;
+//     const { orgId } = req.params;
+
+//     try {
+//         if (!userId || typeof userId !== 'string' || userId.trim() === '') {
+//             return res.status(400).json({
+//                 status: 'error',
+//                 message: 'User ID is required and must be a non-empty string',
+//                 statusCode: 400
+//             });
+//         }
+
+//         const organisation = await prisma.organisation.update({
+//             where: { orgId },
+//             data: { users: { connect: [{ userId }] } }
+//         });
+
+//         res.status(200).json({
+//             status: 'success',
+//             message: 'User added to organisation successfully',
+//             data: { organisation }
+//         });
+//     } catch (error) {
+//         console.error('Error adding user to organisation:', error);
+//         res.status(400).json({
+//             status: 'Bad request',
+//             message: 'Failed to add user to organisation',
+//             statusCode: 400
+//         });
+//     } finally {
+//         await prisma.$disconnect();
+//     }
+// };
 
 const addUserToOrganisation = async (req, res) => {
     try {
@@ -125,17 +161,9 @@ const addUserToOrganisation = async (req, res) => {
             return res.status(404).json({ status: 'error', message: 'User not found' });
         }
 
-        const userToOrganisation = await prisma.organisation.findUnique({ where: { orgId } });
-        if (!userToOrganisation) {
+        const organisation = await prisma.organisation.findUnique({ where: { orgId } });
+        if (!organisation) {
             return res.status(404).json({ status: 'error', message: 'Organisation not found' });
-        }
-
-        if (userToOrganisation.users.some((user) => user.userId === userId)) {
-            return res.status(400).json({
-                status: 'error',
-                message: 'User is already a member of the organisation',
-                statusCode: 400
-            });
         }
 
         await prisma.organisation.update({
@@ -146,7 +174,7 @@ const addUserToOrganisation = async (req, res) => {
         res.status(200).json({
             status: 'Success',
             message: 'User added to organisation successfully',
-            data: { organisation: userToOrganisation }
+            data: { organisation }
         });
     } catch (error) {
         console.error('Error adding user to organisation:', error);
@@ -159,8 +187,6 @@ const addUserToOrganisation = async (req, res) => {
         await prisma.$disconnect();
     }
 };
-
-
 
 module.exports = {
     getOrganisations,
