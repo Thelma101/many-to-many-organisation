@@ -8,7 +8,7 @@ const createOrganisation = async (req, res) => {
     if (!name) {
         return res.status(422).json(validationErrorResponse('name', 'Name is required'));
     }
-    const uuid = uuidv4().substring(0,10);
+    const uuid = uuidv4().substring(0, 10);
     try {
         const organisation = await prisma.organisation.create({
             data: {
@@ -65,41 +65,79 @@ const getOrganisations = async (req, res) => {
         await prisma.$disconnect();
     }
 };
-  
+
+const getOrganisationId = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const organisation = await prisma.organisation.findUnique({
+            where: { orgId: id },
+        });
+
+        if (!organisation) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'Organisation not found',
+                statusCode: 404
+            });
+        }
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Organisation found',
+            data: {
+                orgId: organisation.orgId,
+                name: organisation.name,
+                description: organisation.description
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching organisation:', error);
+        res.status(500).json({
+            status: 'Internal server error',
+            message: 'Failed to fetch organisation',
+            statusCode: 500
+        });
+    } finally {
+        await prisma.$disconnect();
+    }
+}
+
 // const addUserToOrganisation = async (req, res) => {
 //     const { orgId } = req.params;
 //     const { userId } = req.body;
-  
+
 //     try {
 //         const organisation = await prisma.organisation.findUnique({
 //             where: { orgId },
 //         });
-  
+
 //         if (!organisation) {
 //             return res.status(404).json({
 //                 status: 'error',
 //                 message: 'Organisation not found',
 //             });
 //         }
-  
+
 //         const user = await prisma.user.findUnique({
 //             where: { userId },
 //         });
-  
+
 //         if (!user) {
 //             return res.status(404).json({
 //                 status: 'error',
 //                 message: 'User not found',
 //             });
 //         }
-  
+
 //         await prisma.userOrganisation.create({
 //             data: {
 //                 userId,
 //                 orgId,
 //             },
 //         });
-  
+
 //         res.status(200).json({
 //             status: 'success',
 //             message: 'User added to organisation successfully',
@@ -114,10 +152,10 @@ const getOrganisations = async (req, res) => {
 //         await prisma.$disconnect();
 //     }
 // };
-  
+
 module.exports = {
     createOrganisation,
     getOrganisations,
-    // getOrganisationId,
+    getOrganisationId,
     // addUserToOrganisation,
 };

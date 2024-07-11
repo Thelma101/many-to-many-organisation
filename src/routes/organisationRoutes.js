@@ -2,7 +2,7 @@ const express = require('express');
 const {
   createOrganisation,
   getOrganisations,
-  // getOrganisationId,
+  getOrganisationId,
   // addUserToOrganisation,
 } = require('../controllers/organisationController');
 const authenticateJWT = require('../middleware/authenticateJWT');
@@ -16,7 +16,7 @@ router.use(authenticateJWT);
 
 router.post('/', createOrganisation);
 router.get('/', getOrganisations);
-// router.get('/', getOrganisationId);
+router.get('/:id', getOrganisationId);
 
 // router.post('/:orgId/users', addUserToOrganisation);
 
