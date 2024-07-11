@@ -133,8 +133,8 @@ const addUserToOrganisation = async (req, res) => {
 
         await prisma.userOrganisation.create({
             data: {
-                userId,
-                orgId
+                userId: { userId: user.userId},
+                organisationId: { orgId: organisation.orgId }
             },
         });
 
