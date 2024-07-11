@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
-const { generateAccessToken } = require('./utils/authUtils');
+const { generateAccessToken, verifyToken } = require('../utils/generateAccessToken.js');
 
 const prisma = new PrismaClient();
 const saltRounds = 10;
