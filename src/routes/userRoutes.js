@@ -1,7 +1,6 @@
-// routes/userRouter.js
 const express = require('express');
-// const { getUserById, updateUser, deleteUser } = require('../controllers/userController');
-const { getUserById } = require('../controllers/userController');
+// const { updateUser, deleteUser } = require('../controllers/userController');
+const { getUserById, getOrganisations,  getOrganisationById } = require('../controllers/userController');
 const authenticateJWT = require('../middleware/authenticateJWT');
 
 const router = express.Router();
@@ -9,6 +8,8 @@ const router = express.Router();
 router.use(authenticateJWT);
 
 router.get('/:id', getUserById);
+router.get('/', getOrganisations);
+router.get('/:orgId', getOrganisationById);
 // router.put('/:id', updateUser);
 // router.delete('/:id', deleteUser);
 

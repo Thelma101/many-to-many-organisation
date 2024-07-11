@@ -1,62 +1,34 @@
-// const { PrismaClient } = require('@prisma/client');
-// const prisma = new PrismaClient();
-
-// const getUserById = async (req, res) => {
-//     try {
-//         const user = await prisma.user.findUnique({
-//             where: { userId: req.params.id }
-//         });
-
-//         if (!user) {
-//             return res.status(404).json({
-//                 status: 'error',
-//                 message: 'User not found',
-//                 statusCode: 404
-//             });
-//         }
-
-//         res.status(200).json({
-//             status: 'success',
-//             data: { user }
-//         });
-//     } catch (error) {
-//         console.error('Error fetching user:', error);
-//         res.status(500).json({
-//             status: 'Internal server error',
-//             message: 'Failed to fetch user',
-//             statusCode: 500
-//         });
-//     } finally {
-//         await prisma.$disconnect();
-//     }
-// };
-
-// module.exports = {
-//     getUserById,
-//     // updateUser,
-//     // deleteUser,
-// };
-
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const getUserById = async (req, res) => {
     const { id } = req.params;
-
+    const userId = req.user.userId;
+  
     try {
         const user = await prisma.user.findUnique({
             where: { userId: id },
-            include: { organisations: true }
         });
-
+  
         if (!user) {
             return res.status(404).json({
                 status: 'error',
                 message: 'User not found',
-                statusCode: 404
             });
         }
-
+  
+        // Check if the user is in the same organisation
+        const userOrganisation = await prisma.userOrganisation.findFirst({
+            where: { userId: userId, organisationId: { equals: user.organisationId } },
+        });
+  
+        if (!userOrganisation) {
+            return res.status(403).json({
+                status: 'error',
+                message: 'Access denied',
+            });
+        }
+  
         res.status(200).json({
             status: 'success',
             message: 'User found',
@@ -65,173 +37,152 @@ const getUserById = async (req, res) => {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
-                phone: user.phone
-            }
+                phone: user.phone,
+            },
         });
     } catch (error) {
         console.error('Error fetching user:', error);
         res.status(500).json({
             status: 'error',
             message: 'Internal server error',
-            statusCode: 500
         });
     } finally {
         await prisma.$disconnect();
     }
 };
-
-const updateUser = async (req, res) => {
+  
+const getOrganisations = async (req, res) => {
     try {
-        const user = await prisma.user.update({
-            where: { userId: req.params.id },
-            data: req.body
+        const userId = req.user.userId;
+        const organisations = await prisma.organisation.findMany({
+            where: { users: { some: { userId } } }
         });
-
+  
+        if (!organisations || organisations.length === 0) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'No organisations found for the user',
+                statusCode: 404
+            });
+        }
+  
         res.status(200).json({
             status: 'success',
-            data: { user }
+            message: 'Organisations fetched successfully',
+            data: { organisations }
         });
     } catch (error) {
-        console.error('Error updating user:', error);
+        console.error('Error fetching organisations:', error);
         res.status(500).json({
-            status: 'error',
-            message: 'Failed to update user',
+            status: 'Internal server error',
+            message: 'Failed to fetch organisations',
             statusCode: 500
         });
     } finally {
         await prisma.$disconnect();
     }
 };
-
-const deleteUser = async (req, res) => {
+  
+const getOrganisationById = async (req, res) => {
+    const { orgId } = req.params;
+    const userId = req.user.userId;
+  
     try {
-        await prisma.user.delete({
-            where: { userId: req.params.id }
+        const organisation = await prisma.organisation.findUnique({
+            where: { orgId },
         });
-
+  
+        if (!organisation) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'Organisation not found',
+            });
+        }
+  
+        // Check if the user is in the same organisation
+        const userOrganisation = await prisma.userOrganisation.findFirst({
+            where: { userId, organisationId: orgId },
+        });
+  
+        if (!userOrganisation) {
+            return res.status(403).json({
+                status: 'error',
+                message: 'Access denied',
+            });
+        }
+  
         res.status(200).json({
             status: 'success',
-            message: 'User deleted successfully'
+            message: 'Organisation found',
+            data: {
+                orgId: organisation.orgId,
+                name: organisation.name,
+                description: organisation.description,
+            },
         });
     } catch (error) {
-        console.error('Error deleting user:', error);
+        console.error('Error fetching organisation:', error);
         res.status(500).json({
             status: 'error',
-            message: 'Failed to delete user',
-            statusCode: 500
+            message: 'Internal server error',
         });
     } finally {
         await prisma.$disconnect();
     }
 };
-
+  
+const addUserToOrganisation = async (req, res) => {
+    const { orgId } = req.params;
+    const { userId } = req.body;
+  
+    try {
+        const organisation = await prisma.organisation.findUnique({
+            where: { orgId },
+        });
+  
+        if (!organisation) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'Organisation not found',
+            });
+        }
+  
+        const user = await prisma.user.findUnique({
+            where: { userId },
+        });
+  
+        if (!user) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'User not found',
+            });
+        }
+  
+        await prisma.userOrganisation.create({
+            data: {
+                userId,
+                orgId,
+            },
+        });
+  
+        res.status(200).json({
+            status: 'success',
+            message: 'User added to organisation successfully',
+        });
+    } catch (error) {
+        console.error('Error adding user to organisation:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Internal server error',
+        });
+    } finally {
+        await prisma.$disconnect();
+    }
+};
+  
 module.exports = {
     getUserById,
-    updateUser,
-    deleteUser
+    getOrganisations,
+    getOrganisationById,
+    addUserToOrganisation,
 };
-
-
-
-
-// const { PrismaClient } = require('@prisma/client');
-
-// const prisma = new PrismaClient();
-
-// const getUserById = async (req, res) => {
-//     try {
-//         const user = await prisma.user.findUnique({
-//             where: { userId: req.params.id }
-//         });
-
-//         if (!user) {
-//             return res.status(404).json({
-//                 status: 'error',
-//                 message: 'User not found',
-//                 statusCode: 404
-//             });
-//         }
-
-//         res.status(200).json({
-//             status: 'success',
-//             data: { user }
-//         });
-//     } catch (error) {
-//         console.error('Error fetching user:', error);
-//         res.status(500).json({
-//             status: 'Internal server error',
-//             message: 'Failed to fetch user',
-//             statusCode: 500
-//         });
-//     } finally {
-//         await prisma.$disconnect();
-//     }
-// };
-
-// const updateUser = async (req, res) => {
-//     const { id } = req.params;
-//     const { firstName, lastName, email, phone, password } = req.body;
-
-//     try {
-//         const updateData = {};
-
-//         if (firstName) updateData.firstName = firstName;
-//         if (lastName) updateData.lastName = lastName;
-//         if (email) updateData.email = email;
-//         if (phone) updateData.phone = phone;
-//         if (password) {
-//             const hashedPassword = await bcrypt.hash(password, saltRounds);
-//             updateData.password = hashedPassword;
-//         }
-
-//         const user = await prisma.user.update({
-//             where: { userId: id },
-//             data: updateData
-//         });
-
-//         res.status(200).json({
-//             status: 'success',
-//             message: 'User updated successfully',
-//             data: { user }
-//         });
-//     } catch (error) {
-//         console.error('Error updating user:', error);
-//         res.status(400).json({
-//             status: 'Bad request',
-//             message: 'Failed to update user',
-//             statusCode: 400
-//         });
-//     } finally {
-//         await prisma.$disconnect();
-//     }
-// };
-
-// const deleteUser = async (req, res) => {
-//     const { id } = req.params;
-
-//     try {
-//         await prisma.user.delete({
-//             where: { userId: id }
-//         });
-
-//         res.status(200).json({
-//             status: 'success',
-//             message: 'User deleted successfully'
-//         });
-//     } catch (error) {
-//         console.error('Error deleting user:', error);
-//         res.status(400).json({
-//             status: 'Bad request',
-//             message: 'Failed to delete user',
-//             statusCode: 400
-//         });
-//     } finally {
-//         await prisma.$disconnect();
-//     }
-// };
-
-// module.exports = {
-//     getUserById,
-//     updateUser,
-//     deleteUser,
-// };
