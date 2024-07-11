@@ -8,7 +8,6 @@ const router = express.Router();
 router.use(authenticateJWT);
 
 // router.get('/:id', getOrganisationByUserId);
-router.get('api/organisation', getOrganisations);
 // router.get('/:orgId', getOrganisationById);
 // router.put('/:id', updateUser);
 // router.delete('/:id', deleteUser);

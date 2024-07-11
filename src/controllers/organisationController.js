@@ -33,6 +33,38 @@ const createOrganisation = async (req, res) => {
         });
     }
 };
+
+const getOrganisations = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const organisations = await prisma.organisation.findMany({
+            where: { users: { some: { userId } } }
+        });
+
+        if (!organisations || organisations.length === 0) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'No organisations found for the user',
+                statusCode: 404
+            });
+        }
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Organisations fetched successfully',
+            data: { organisations }
+        });
+    } catch (error) {
+        console.error('Error fetching organisations:', error);
+        res.status(500).json({
+            status: 'Internal server error',
+            message: 'Failed to fetch organisations',
+            statusCode: 500
+        });
+    } finally {
+        await prisma.$disconnect();
+    }
+};
   
 // const addUserToOrganisation = async (req, res) => {
 //     const { orgId } = req.params;
@@ -85,5 +117,6 @@ const createOrganisation = async (req, res) => {
   
 module.exports = {
     createOrganisation,
+    getOrganisations,
     // addUserToOrganisation,
 };
