@@ -1,4 +1,4 @@
-
+// const saltRounds = new Number(process.env.SALT_ROUNDS);
 
 const validateUserFields = (req, res, next) => {
     const { firstName, lastName, email, password } = req.body;
