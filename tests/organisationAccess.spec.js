@@ -21,13 +21,13 @@ describe('Organisation Access Control', () => {
         // Create a test user
         testUser = await prisma.user.create({
             data: {
-                userId: uuidv4().substring(0, 8),
+                userId: uuidv4().substring(0, 6),
                 firstName: 'tee',
                 lastName: 'Thelma',
                 email: `test.user${Math.random()}@mail.com`,
                 password: '123',
-                phone: '1234567890',
-                createdAt: new Date(),
+                phone: '1234567890'
+                // createdAt: new Date(),
             },
         });
 
@@ -35,26 +35,26 @@ describe('Organisation Access Control', () => {
             data: {
                 orgId: uuidv4().substring(0, 10),
                 name: 'Test Organisation',
-                description: 'Olivia Popo once said: This is a test organisation.'
+                description: 'Gabrielle Anchor This is a test organisation.'
             }
         });
 
-        // await prisma.userOrganisation.create({
-        //     data: {
-        //         userId: { connect: { userId: testUser.userId } },
-        //         orgId: { connect: { orgId: testOrg.orgId } },
-        //     }
-        // });
-
-
-          await prisma.userOrganisation.create({
+        await prisma.userOrganisation.create({
             data: {
-              userId: testUser.userId,
-              orgId: testOrg.orgId,
-              user: testUser.userId,
-              organisation:  testOrg.orgId,
+                userId: testUser.userId,
+                organisationId: testOrg.orgId,
             }
-          });
+        });
+
+
+        //   await prisma.userOrganisation.create({
+        //     data: {
+        //       userId: testUser.userId,
+        //       orgId: testOrg.orgId,
+        //       user: testUser.userId,
+        //       organisation:  testOrg.orgId,
+        //     }
+        //   });
 
         token = generateToken(testUser.userId);
 
@@ -112,7 +112,7 @@ describe('Organisation Access Control', () => {
     it('should create a new organisation', async () => {
         const response = await request(app)
             .post('/api/organisations')
-            .set('Authorization', `Bearer ${token}`)
+            // .set('Authorization', `Bearer ${token}`)
             .send({
                 name: 'New Organisation',
                 description: 'Organisation Description'
@@ -125,29 +125,42 @@ describe('Organisation Access Control', () => {
     it('should fail to create organisation with invalid data', async () => {
         const response = await request(app)
             .post('/api/organisations')
-            .set('Authorization', `Bearer ${token}`)
+            // .set('Authorization', `Bearer ${token}`)
             .send({ name: '' });
 
         expect(response.status).toBe(400);
         expect(response.body.message).toBe('Organisation name is required and must be a non-empty string');
     });
 
+    // it('should add a user to an existing organisation', async () => {
+    //     const newUser = await prisma.user.create({
+    //         data: {
+    //             userId: uuidv4().substring(0, 8),
+    //             firstName: 'terry',
+    //             lastName: 'chapman',
+    //             email: 'new.user1@mail.com',
+    //             password: '123',
+    //             phone: '1234567890',
+    //             createdAt: new Date(),
+    //         }
+    //     });
+
     it('should add a user to an existing organisation', async () => {
         const newUser = await prisma.user.create({
             data: {
-                userId: uuidv4().substring(0, 8),
+                // userId: uuidv4().substring(0, 8),
                 firstName: 'terry',
                 lastName: 'chapman',
-                email: 'new.user1@mail.com',
+                email: 'new.user16@mail.com',
                 password: '123',
                 phone: '1234567890',
-                createdAt: new Date(),
+                // createdAt: new Date(),
             }
         });
 
         const response = await request(app)
             .post(`/api/organisations/${testOrg.orgId}/users`)
-            .set('Authorization', `Bearer ${token}`)
+            // .set('Authorization', `Bearer ${token}`)
             .send({ userId: newUser.userId });
 
         expect(response.status).toBe(200);
@@ -161,47 +174,14 @@ describe('Organisation Access Control', () => {
 
         const response = await request(app)
             .post(`/api/organisations/${testOrg.orgId}/users`)
-            .set('Authorization', `Bearer ${token}`)
+            // .set('Authorization', `Bearer ${token}`)
             .send({ userId: '' });
 
         expect(response.status).toBe(400);
         expect(response.body.message).toBe('User ID is required and must be a non-empty string');
     });
-it('should add a user to an existing organisation', async () => {
-        const newUser = await prisma.user.create({
-          data: {
-            userId: uuid,
-            firstName: 'new',
-            lastName: 'user',
-            email: 'new.user1@mail.com',
-            password: '123',
-            phone: '1234567890',
-            createdAt: new Date(),
-          }
-        });
-    
-        const response = await request(app)
-          .post(`/api/organisations/${testOrg.orgId}/users`)
-          .set('Authorization', `Bearer ${token}`)
-          .send({ userId: newUser.userId });
-    
-        expect(response.status).toBe(200);
-        expect(response.body.message).toBe('User added to organisation successfully');
-      });
-    
-      it('should fail to add user to organisation with invalid data', async () => {
-        // Ensure testOrg is defined
-        expect(testOrg).toBeDefined();
-    
-        const response = await request(app)
-          .post(`/api/organisations/${testOrg.orgId}/users`)
-          .set('Authorization', `Bearer ${token}`)
-          .send({ userId: '' });
-    
-        expect(response.status).toBe(400);
-        expect(response.body.message).toBe('User ID is required and must be a non-empty string');
-      });
-    });
+});
+
     
 
 // const request = require('supertest');
