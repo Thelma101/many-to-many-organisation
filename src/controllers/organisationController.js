@@ -104,58 +104,58 @@ const getOrganisationId = async (req, res) => {
     }
 }
 
-// const addUserToOrganisation = async (req, res) => {
-//     const { orgId } = req.params;
-//     const { userId } = req.body;
+const addUserToOrganisation = async (req, res) => {
+    const { orgId } = req.params;
+    const { userId } = req.body;
 
-//     try {
-//         const organisation = await prisma.organisation.findUnique({
-//             where: { orgId },
-//         });
+    try {
+        const organisation = await prisma.organisation.findUnique({
+            where: { orgId },
+        });
 
-//         if (!organisation) {
-//             return res.status(404).json({
-//                 status: 'error',
-//                 message: 'Organisation not found',
-//             });
-//         }
+        if (!organisation) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'Organisation not found',
+            });
+        }
 
-//         const user = await prisma.user.findUnique({
-//             where: { userId },
-//         });
+        const user = await prisma.user.findUnique({
+            where: { userId },
+        });
 
-//         if (!user) {
-//             return res.status(404).json({
-//                 status: 'error',
-//                 message: 'User not found',
-//             });
-//         }
+        if (!user) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'User not found',
+            });
+        }
 
-//         await prisma.userOrganisation.create({
-//             data: {
-//                 userId,
-//                 orgId,
-//             },
-//         });
+        await prisma.userOrganisation.create({
+            data: {
+                userId,
+                orgId,
+            },
+        });
 
-//         res.status(200).json({
-//             status: 'success',
-//             message: 'User added to organisation successfully',
-//         });
-//     } catch (error) {
-//         console.error('Error adding user to organisation:', error);
-//         res.status(500).json({
-//             status: 'error',
-//             message: 'Internal server error',
-//         });
-//     } finally {
-//         await prisma.$disconnect();
-//     }
-// };
+        res.status(200).json({
+            status: 'success',
+            message: 'User added to organisation successfully',
+        });
+    } catch (error) {
+        console.error('Error adding user to organisation:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Internal server error',
+        });
+    } finally {
+        await prisma.$disconnect();
+    }
+};
 
 module.exports = {
     createOrganisation,
     getOrganisations,
     getOrganisationId,
-    // addUserToOrganisation,
+    addUserToOrganisation
 };
