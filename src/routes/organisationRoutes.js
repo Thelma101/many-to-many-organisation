@@ -1,6 +1,6 @@
 const express = require('express');
 const {
-  getUserOrganisations,
+  getOrganisations,
   getOrganisationById,
   createOrganisation,
   addUserToOrganisation,
@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.use(authenticateJWT);
 
-router.get('/', getUserOrganisations);
+router.get('/', getOrganisations);
 // router.get('/created', getUserCreatedOrganisations);
 router.get('/:orgId', getOrganisationById);
 router.post('/', createOrganisation);
