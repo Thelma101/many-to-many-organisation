@@ -1,7 +1,7 @@
 const express = require('express');
 const {
   createOrganisation,
-  addUserToOrganisation,
+  // addUserToOrganisation,
 } = require('../controllers/organisationController');
 const authenticateJWT = require('../middleware/authenticateJWT');
 
@@ -13,6 +13,6 @@ router.use(authenticateJWT);
 // router.get('/created', getUserCreatedOrganisations);
 
 router.post('/', createOrganisation);
-router.post('/:orgId/users', addUserToOrganisation);
+// router.post('/:orgId/users', addUserToOrganisation);
 
 module.exports = router;
