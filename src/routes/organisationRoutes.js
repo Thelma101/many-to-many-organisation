@@ -2,7 +2,6 @@ const express = require('express');
 const {
   createOrganisation,
   addUserToOrganisation,
-//   getUserCreatedOrganisations
 } = require('../controllers/organisationController');
 const authenticateJWT = require('../middleware/authenticateJWT');
 

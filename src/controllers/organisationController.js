@@ -9,14 +9,14 @@ const createOrganisation = async (req, res) => {
     if (!name) {
         return res.status(422).json(validationErrorResponse('name', 'Name is required'));
     }
-  
+        const uuid = uuidv4().substring(0,10);
     try {
         const organisation = await prisma.organisation.create({
             data: {
-                orgId: uuidv4(),
+                orgId: uuid,
                 name,
-                description,
-                creatorId: userId,
+                description
+                // creatorId: userId,
             },
         });
   
