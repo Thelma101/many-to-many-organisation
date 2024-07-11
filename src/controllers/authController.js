@@ -23,32 +23,37 @@ const registerUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const user = await prisma.user.create({
-      data: {
-        userId: uuidv4(),
-        firstName,
-        lastName,
-        email,
-        password: hashedPassword,
-        phone,
-      },
-    });
-
-    const organisation = await prisma.organisation.create({
-      data: {
-        orgId: uuidv4(),
-        name: `${firstName}'s Organisation`,
-        description: req.body.description, 
-      },
-    });
-
-    await prisma.userOrganisation.create({
-      data: {
-        userId: user.userId,
-        orgId: organisation.orgId,
-        user: { user: user.userId},
-        organisation: { organisation: organisation.orgId }
-      },
+    const result = await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.create({
+        data: {
+          userId: uuidv4(),
+          firstName,
+          lastName,
+          email,
+          password: hashedPassword,
+          phone,
+        },
+      });
+    
+      const organisation = await prisma.organisation.create({
+        data: {
+          orgId: uuidv4(),
+          name: `${firstName}'s Organisation`,
+          description: req.body.description,
+        },
+      });
+    
+      await prisma.userOrganisation.create({
+        data: {
+          userId: user.userId,
+          orgId: organisation.orgId,
+      
+          user: { connect: { userId: user.userId } },
+          organisation: { connect: { orgId: organisation.orgId } },
+        },
+      });
+    
+      return { user, organisation };
     });
 
     const accessToken = generateAccessToken(user);
