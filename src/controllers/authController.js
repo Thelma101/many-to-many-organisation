@@ -45,8 +45,8 @@ const registerUser = async (req, res) => {
     
       await prisma.userOrganisation.create({
         data: {
-          userId: user.userId,
-          orgId: organisation.orgId,
+          // userId: user.userId,
+          // orgId: organisation.orgId,
       
           user: { connect: { userId: user.userId } },
           organisation: { connect: { orgId: organisation.orgId } },
