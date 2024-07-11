@@ -2,13 +2,13 @@ const express = require('express');
 // const { updateUser, deleteUser } = require('../controllers/userController');
 // const { getUserById, getOrganisations,  getOrganisationById } = require('../controllers/userController');
 const authenticateJWT = require('../middleware/authenticateJWT');
-const { getOrganisationByUserId } = require('../controllers/userController')
+const { getOrganisations } = require('../controllers/userController')
 const router = express.Router();
 
 router.use(authenticateJWT);
 
-router.get('/:id', getOrganisationByUserId);
-// router.get('/', getOrganisations);
+// router.get('/:id', getOrganisationByUserId);
+router.get('api/organisation', getOrganisations);
 // router.get('/:orgId', getOrganisationById);
 // router.put('/:id', updateUser);
 // router.delete('/:id', deleteUser);
