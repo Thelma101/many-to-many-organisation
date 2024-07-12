@@ -192,4 +192,4 @@ jest.mock('@prisma/client');
             message: 'Internal server error',
         });
     });
-});
+
