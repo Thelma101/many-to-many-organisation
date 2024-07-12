@@ -7,27 +7,27 @@ const { PrismaClient } = require ('@prisma/client');
 
 jest.mock('@prisma/client');
 
-// describe('addUserToOrganisation', () => {
-//     let req;
-//     let res;
-//     let prisma;
+describe('addUserToOrganisation', () => {
+    let req;
+    let res;
+    let prisma;
 
-//     beforeEach(() => {
-//         req = {
-//             params: { orgId: 'testOrgId' },
-//             body: { userId: 'testUserId' },
-//             user: { userId: 'testUserId' },
-//         };
-//         res = {
-//             status: jest.fn(() => res),
-//             json: jest.fn(() => res),
-//         };
-//         prisma = new PrismaClient();
-//     });
+    beforeEach(() => {
+        req = {
+            params: { orgId: 'testOrgId' },
+            body: { userId: 'testUserId' },
+            user: { userId: 'testUserId' },
+        };
+        res = {
+            status: jest.fn(() => res),
+            json: jest.fn(() => res),
+        };
+        prisma = new PrismaClient();
+    });
 
-//     afterEach(() => {
-//         jest.clearAllMocks();
-//     });
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
 
     //   CREATE ORG
 
