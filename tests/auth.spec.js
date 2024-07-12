@@ -1,9 +1,10 @@
+const express = require('express');
 const request = require('supertest');
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const app = require('../src/app'); // Ensure this path is correct for your app
-const app = express();
+const server = express();
 const prismaClientMock = new PrismaClient();
 
 beforeAll(() => {
