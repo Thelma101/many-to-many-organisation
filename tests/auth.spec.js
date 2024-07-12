@@ -1,45 +1,37 @@
-const nock = require('nock');
 const request = require('supertest');
-const app = require('../src/app'); // Ensure this is your Express app
-const { prisma } = require('./src/prismaClient'); // Ensure this is your Prisma client
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const app = require('../src/app'); // Ensure this path is correct for your app
+const app = express();
+const prismaClientMock = new PrismaClient();
 
-// Mock Prisma client
-const prismaClientMock = {
-  user: {
-    findUnique: jest.fn(),
-    create: jest.fn(),
-  },
-  organisation: {
-    create: jest.fn(),
-  },
-};
+beforeAll(() => {
+  server = app.listen(3001);
+});
 
-// Override the prisma client in your app with the mock
-jest.mock('../src/prismaClient', () => ({
-  prisma: prismaClientMock,
-}));
+afterAll(() => {
+  server.close();
+});
 
-// Helper function to mock JWT token generation
-jest.mock('../src/utils/jwt', () => ({
-  generateToken: () => 'accessToken',
-}));
-
-describe('Auth Endpoints', () => {
+const generateUniqueEmail = () => `testuser${Date.now()}@example.com`;
+describe('Auth Routes', () => {
   beforeEach(() => {
-    nock.cleanAll();
     jest.clearAllMocks();
   });
 
+  // Test Case 1: Register with existing email
   describe('POST /auth/register', () => {
     it('should fail when email is already in use', async () => {
-      prismaClientMock.user.findUnique.mockResolvedValue({ id: '1', email: 'test@example.com' });
+      const existingEmail = generateUniqueEmail();
+      prismaClientMock.user.findUnique.mockResolvedValue({ id: '1', email: existingEmail });
 
       const response = await request(app)
         .post('/auth/register')
         .send({
           firstName: 'Test',
           lastName: 'User',
-          email: 'test@example.com',
+          email: existingEmail,
           password: 'password123',
           phone: '1234567890',
         });
@@ -49,17 +41,29 @@ describe('Auth Endpoints', () => {
       expect(response.body.message).toBe('Email already in use');
     });
 
+    // Test Case 2: Register successfully
     it('should register a user successfully', async () => {
+      const newEmail = generateUniqueEmail();
       prismaClientMock.user.findUnique.mockResolvedValue(null);
-      prismaClientMock.user.create.mockResolvedValue({ id: '1', userId: '123456', firstName: 'Test', lastName: 'User', email: 'test@example.com', password: 'hashedPassword', phone: '1234567890' });
+      prismaClientMock.user.create.mockResolvedValue({
+        id: '1',
+        userId: '123456',
+        firstName: 'Test',
+        lastName: 'User',
+        email: newEmail,
+        password: 'hashedPassword',
+        phone: '1234567890',
+      });
       prismaClientMock.organisation.create.mockResolvedValue({ id: '1', name: "Test's Organisation" });
+      bcrypt.hash.mockResolvedValue('hashedPassword');
+      jwt.sign.mockReturnValue('accessToken');
 
       const response = await request(app)
         .post('/auth/register')
         .send({
           firstName: 'Test',
           lastName: 'User',
-          email: 'test@example.com',
+          email: newEmail,
           password: 'password123',
           phone: '1234567890',
         });
@@ -72,7 +76,7 @@ describe('Auth Endpoints', () => {
         userId: '123456',
         firstName: 'Test',
         lastName: 'User',
-        email: 'test@example.com',
+        email: newEmail,
         phone: '1234567890',
       });
       expect(response.body.data.organisation).toEqual({
@@ -80,7 +84,9 @@ describe('Auth Endpoints', () => {
       });
     });
 
+    // Test Case 3: Register with invalid password
     it('should fail when password is invalid', async () => {
+      const newEmail = generateUniqueEmail();
       prismaClientMock.user.findUnique.mockResolvedValue(null);
 
       const response = await request(app)
@@ -88,7 +94,7 @@ describe('Auth Endpoints', () => {
         .send({
           firstName: 'Test',
           lastName: 'User',
-          email: 'test@example.com',
+          email: newEmail,
           password: 'hort',
           phone: '1234567890',
         });
@@ -98,12 +104,15 @@ describe('Auth Endpoints', () => {
       expect(response.body.message).toBe('Password must be at least 8 characters');
     });
 
+    // Test Case 4: Register with missing firstName
     it('should fail when firstName is missing', async () => {
+      const newEmail = generateUniqueEmail();
+
       const response = await request(app)
         .post('/auth/register')
         .send({
           lastName: 'User',
-          email: 'test@example.com',
+          email: newEmail,
           password: 'password123',
           phone: '1234567890',
         });
@@ -114,14 +123,26 @@ describe('Auth Endpoints', () => {
     });
   });
 
+  // Test Case 1: Login with valid credentials
   describe('POST /auth/login', () => {
     it('should login successfully with valid credentials', async () => {
-      prismaClientMock.user.findUnique.mockResolvedValue({ id: '1', userId: '123456', firstName: 'Test', lastName: 'User', email: 'test@example.com', password: 'hashedPassword', phone: '1234567890' });
+      const newEmail = generateUniqueEmail();
+      prismaClientMock.user.findUnique.mockResolvedValue({
+        id: '1',
+        userId: '123456',
+        firstName: 'Test',
+        lastName: 'User',
+        email: newEmail,
+        password: 'hashedPassword',
+        phone: '1234567890',
+      });
+      bcrypt.compare.mockResolvedValue(true);
+      jwt.sign.mockReturnValue('accessToken');
 
       const response = await request(app)
         .post('/auth/login')
         .send({
-          email: 'test@example.com',
+          email: newEmail,
           password: 'password123',
         });
 
@@ -133,11 +154,12 @@ describe('Auth Endpoints', () => {
         userId: '123456',
         firstName: 'Test',
         lastName: 'User',
-        email: 'test@example.com',
+        email: newEmail,
         phone: '1234567890',
       });
     });
 
+    // Test Case 2: Login with invalid email
     it('should fail when email is invalid', async () => {
       prismaClientMock.user.findUnique.mockResolvedValue(null);
 
@@ -153,13 +175,24 @@ describe('Auth Endpoints', () => {
       expect(response.body.message).toBe('Invalid email or password');
     });
 
+    // Test Case 3: Login with invalid password
     it('should fail when password is invalid', async () => {
-      prismaClientMock.user.findUnique.mockResolvedValue({ id: '1', userId: '123456', firstName: 'Test', lastName: 'User', email: 'test@example.com', password: 'hashedPassword', phone: '1234567890' });
+      const newEmail = generateUniqueEmail();
+      prismaClientMock.user.findUnique.mockResolvedValue({
+        id: '1',
+        userId: '123456',
+        firstName: 'Test',
+        lastName: 'User',
+        email: newEmail,
+        password: 'hashedPassword',
+        phone: '1234567890',
+      });
+      bcrypt.compare.mockResolvedValue(false);
 
       const response = await request(app)
         .post('/auth/login')
         .send({
-          email: 'test@example.com',
+          email: newEmail,
           password: 'wrongpassword',
         });
 
@@ -168,6 +201,7 @@ describe('Auth Endpoints', () => {
       expect(response.body.message).toBe('Invalid email or password');
     });
 
+    // Test Case 4: Login with missing email
     it('should fail when email is missing', async () => {
       const response = await request(app)
         .post('/auth/login')
@@ -180,11 +214,14 @@ describe('Auth Endpoints', () => {
       expect(response.body.message).toBe('Email is required');
     });
 
+    // Test Case 5: Login with missing password
     it('should fail when password is missing', async () => {
+      const newEmail = generateUniqueEmail();
+
       const response = await request(app)
         .post('/auth/login')
         .send({
-          email: 'test@example.com',
+          email: newEmail,
         });
 
       expect(response.status).toBe(400);
